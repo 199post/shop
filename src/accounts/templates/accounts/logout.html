@@ -1,0 +1,15 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Выход - Магазин{% endblock %}
+
+{% block content %}
+<h1>Вы вышли из системы</h1>
+<p style="text-align: center; color: #555; margin-bottom: 20px;">
+    Спасибо за использование нашего магазина!
+</p>
+<div class="links">
+    <p><a href="{% url 'login' %}">Войти снова</a></p>
+    <p><a href="{% url 'index' %}">Вернуться на главную</a></p>
+</div>
+{% endblock %}
+

@@ -1,0 +1,19 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Профиль - Магазин{% endblock %}
+
+{% block content %}
+<h1>Профиль пользователя</h1>
+<div style="margin-bottom: 20px;">
+    <p style="color: #555; margin-bottom: 10px;"><strong>Имя пользователя:</strong> {{ user.username }}</p>
+    <p style="color: #555; margin-bottom: 10px;"><strong>Email:</strong> {{ user.email|default:"Не указан" }}</p>
+    <p style="color: #555; margin-bottom: 10px;"><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}</p>
+    <p style="color: #555;"><strong>Последний вход:</strong> {{ user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</p>
+</div>
+
+<div class="links">
+    <p><a href="{% url 'index' %}">На главную</a></p>
+    <p><a href="{% url 'logout' %}">Выйти</a></p>
+</div>
+{% endblock %}
+
