@@ -70,8 +70,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # ===================== БАЗА ДАННЫХ =====================
 
-# По умолчанию SQLite (локально и на Railway, если НЕ заданы DB_* переменные).
-# Если когда-нибудь захочешь PostgreSQL — просто задашь DB_ENGINE/DB_HOST/DB_NAME и т.д.
+# Здесь БД полностью управляется переменными окружения.
+# Чтобы везде был PostgreSQL, нужно ЗАДАТЬ:
+#   DB_ENGINE=django.db.backends.postgresql
+#   DB_NAME=...
+#   DB_USER=...
+#   DB_PASSWORD=...
+#   DB_HOST=...
+#   DB_PORT=5432
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),

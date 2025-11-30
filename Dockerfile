@@ -11,19 +11,26 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Рабочая папка в контейнере
+# Рабочая директория
 WORKDIR /app
 
-# Установка Python зависимостей
+# Копируем requirements
 COPY requirements.txt .
+
+# Устанавливаем Python зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем проект (src содержит manage.py и приложение)
+# Копируем весь Django проект
 COPY ./src /app
 
 # Команда старта:
-# 1) применяем миграции
-# 2) сидируем данные (если БД пустая)
-# 3) собираем статику
-# 4) запускаем сервер (для Railway используется Procfile)
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py seed_db && python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
+# 1) migrate
+# 2) seed_db
+# 3) collectstatic
+# 4) run gunicorn на Railway PORT
+CMD sh -c "\
+    python manage.py migrate --noinput && \
+    python manage.py seed_db && \
+    python manage.py collectstatic --noinput && \
+    gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --log-file - \
+    "
