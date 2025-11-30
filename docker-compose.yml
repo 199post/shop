@@ -1,18 +1,17 @@
-version: '3.9'
-
 services:
   web:
     build: .
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT   # ← главное изменение!
+    command: sh -c "python manage.py migrate --noinput && python manage.py seed_db && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./src:/app
-    working_dir: /app                                                # ← обязательно!
+    working_dir: /app
     ports:
       - "8000:8000"
     env_file:
-      - .env                                                         # ← лучше через .env, а не жёстко в compose
+      - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:15-alpine
@@ -22,11 +21,22 @@ services:
       - POSTGRES_DB=shopdb
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+    depends_on:
+      - db
 
 volumes:
   postgres_data:
