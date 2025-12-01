@@ -13,19 +13,19 @@ docker compose up -d
 ### 3. Примените миграции
 
 ```bash
-docker compose exec web python src/manage.py migrate
+docker compose exec web python manage.py migrate
 ```
 
 ### 4. Создайте суперпользователя (если еще не создан)
 
 ```bash
-docker compose exec web python src/manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 ```
 
 ### 5. Заполните базу данных тестовыми данными (если нужно)
 
 ```bash
-docker compose exec web python src/manage.py seed_db
+docker compose exec web python manage.py seed_db
 ```
 
 ### 6. Откройте приложение

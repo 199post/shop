@@ -53,7 +53,7 @@ docker compose up -d
 ### Шаг 4: Примените миграции
 
 ```bash
-docker compose exec web python src/manage.py migrate
+docker compose exec web python manage.py migrate
 ```
 
 Это применит две новые миграции:
@@ -160,9 +160,9 @@ shop/
 ```bash
 docker compose down -v
 docker compose up -d
-docker compose exec web python src/manage.py migrate
-docker compose exec web python src/manage.py createsuperuser
-docker compose exec web python src/manage.py seed_db
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py seed_db
 ```
 
 ### Проблема 2: Фото не отображаются
