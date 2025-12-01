@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Профиль - Магазин</title>
+    <title>Заказ #{{ order.id }} - Магазин</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -98,20 +98,21 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .profile-info {
+        .order-info {
             background: #f8f9fa;
             padding: 30px;
             border-radius: 8px;
             margin-bottom: 30px;
         }
 
-        .profile-info h2 {
+        .order-info h2 {
             color: #333;
             margin-bottom: 20px;
         }
 
         .info-row {
             display: flex;
+            justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #e0e0e0;
         }
@@ -123,53 +124,17 @@
         .info-label {
             font-weight: 600;
             color: #555;
-            min-width: 200px;
         }
 
         .info-value {
             color: #333;
         }
 
-        .orders-section {
-            margin-top: 30px;
-        }
-
-        .orders-section h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .order-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: box-shadow 0.3s;
-            border-left: 4px solid #667eea;
-        }
-
-        .order-card:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .order-number {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-        }
-
         .status {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 13px;
+            display: inline-block;
         }
 
         .status.pending {
@@ -192,58 +157,74 @@
             color: #721c24;
         }
 
-        .order-details {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
+        .order-items {
+            margin-top: 30px;
         }
 
-        .order-total {
-            font-size: 18px;
-            font-weight: bold;
-            color: #764ba2;
-            margin-top: 10px;
-        }
-
-        .no-orders {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .messages {
+        .order-items h2 {
+            color: #333;
             margin-bottom: 20px;
         }
 
-        .message {
-            padding: 15px;
+        .order-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
             border-radius: 8px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .category {
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .total-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+            text-align: right;
+        }
+
+        .total-section h3 {
+            font-size: 32px;
             margin-bottom: 10px;
         }
 
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .message.info {
-            background-color: #d1ecf1;
-            color: #0c5460;
+        .message-box {
+            background: #d1ecf1;
             border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .message-box h3 {
+            margin-bottom: 10px;
         }
 
         @media (max-width: 768px) {
-            .order-header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
+            .order-item {
+                grid-template-columns: 1fr;
+                text-align: center;
             }
         }
     </style>
@@ -252,7 +233,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>👤 Профиль пользователя</h1>
+            <h1>📦 Заказ #{{ order.id }}</h1>
             <nav class="nav">
                 <a href="{% url 'index' %}">Главная</a>
                 <a href="{% url 'product_list' %}">Все товары</a>
@@ -265,67 +246,58 @@
                         {% endif %}
                     </span>
                 </a>
+                <a href="{% url 'profile' %}">Профиль</a>
                 <a href="{% url 'logout' %}" class="btn">Выйти</a>
             </nav>
         </div>
 
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <div class="profile-info">
-            <h2>Информация о профиле</h2>
+        <div class="order-info">
+            <h2>Информация о заказе</h2>
             <div class="info-row">
-                <span class="info-label">Имя пользователя:</span>
-                <span class="info-value">{{ user.username }}</span>
+                <span class="info-label">Номер заказа:</span>
+                <span class="info-value">#{{ order.id }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Email:</span>
-                <span class="info-value">{{ user.email|default:"Не указан" }}</span>
+                <span class="info-label">Дата создания:</span>
+                <span class="info-value">{{ order.created_at|date:"d.m.Y H:i" }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Дата регистрации:</span>
-                <span class="info-value">{{ user.date_joined|date:"d.m.Y H:i" }}</span>
+                <span class="info-label">Статус:</span>
+                <span class="status {{ order.status }}">{{ order.get_status_display }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Последний вход:</span>
-                <span class="info-value">{{ user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</span>
+                <span class="info-label">Покупатель:</span>
+                <span class="info-value">{{ order.user.username }}</span>
             </div>
         </div>
 
-        <div class="orders-section">
-            <h2>Последние заказы</h2>
-            {% if orders %}
-            {% for order in orders %}
-            <div class="order-card">
-                <div class="order-header">
-                    <div class="order-number">Заказ #{{ order.id }}</div>
-                    <div class="status {{ order.status }}">{{ order.get_status_display }}</div>
+        <div class="order-items">
+            <h2>Товары в заказе</h2>
+            {% for item in order.items.all %}
+            <div class="order-item">
+                <div>
+                    <div class="product-name">{{ item.product.name }}</div>
+                    <div class="category">{{ item.product.category.name }}</div>
                 </div>
-                <div class="order-details">
-                    Дата: {{ order.created_at|date:"d.m.Y H:i" }} | Товаров: {{ order.items.count }}
-                </div>
-                <div class="order-total">
-                    Итого: {{ order.total_price|floatformat:0 }} грн
-                </div>
-                <a href="{% url 'order_detail' order.id %}" class="btn" style="margin-top: 10px;">Подробнее</a>
+                <div class="price">{{ item.price|floatformat:0 }} грн</div>
+                <div>Количество: {{ item.quantity }}</div>
+                <div class="price">{{ item.get_total_price|floatformat:0 }} грн</div>
             </div>
             {% endfor %}
-            <div style="text-align: center; margin-top: 20px;">
-                <a href="{% url 'order_list' %}" class="btn">Все заказы</a>
-            </div>
-            {% else %}
-            <div class="no-orders">
-                <p>У вас пока нет заказов</p>
-                <a href="{% url 'product_list' %}" class="btn" style="margin-top: 20px;">Начать покупки</a>
-            </div>
-            {% endif %}
+        </div>
+
+        <div class="total-section">
+            <h3>Итого: {{ order.total_price|floatformat:0 }} грн</h3>
+        </div>
+
+        <div class="message-box">
+            <h3>✅ Ваш заказ принят!</h3>
+            <p>Дождитесь, с вами свяжется оператор для подтверждения заказа.</p>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="{% url 'product_list' %}" class="btn">Продолжить покупки</a>
+            <a href="{% url 'order_list' %}" class="btn" style="margin-left: 10px;">Мои заказы</a>
         </div>
     </div>
 </body>
