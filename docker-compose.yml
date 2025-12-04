@@ -1,11 +1,20 @@
-version: "3.9"
+# docker-compose.yml
 
 services:
   web:
+    # Собираем образ из локального Dockerfile
     build:
       context: .
       dockerfile: Dockerfile
+
+    # Внутри контейнера работаем из /app
     working_dir: /app
+
+    # Команда для локальной разработки:
+    # - миграции
+    # - сидируем данные
+    # - собираем статику
+    # - запускаем runserver на 8000
     command: >
       sh -c "
         python manage.py migrate --noinput &&
@@ -13,27 +22,40 @@ services:
         python manage.py collectstatic --noinput &&
         python manage.py runserver 0.0.0.0:8000
       "
+
+    # Монтируем локальный код и медиа
     volumes:
-      - ./src:/app
+      - ./src:/app # твой исходный код
       - media_data:/app/media
+
+    # Пробрасываем порт на хост
     ports:
       - "8000:8000"
+
+    # Переменные окружения (DEBUG, DATABASE_URL и т.п.)
     env_file:
       - .env
+
+    # Ждём, пока БД станет healthy
     depends_on:
       db:
         condition: service_healthy
 
   db:
     image: postgres:15-alpine
+
     environment:
       POSTGRES_DB: shopdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+    # Пробрасываем порт Postgres наружу (можешь убрать, если не нужен с хоста)
     ports:
       - "5432:5432"
+
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
