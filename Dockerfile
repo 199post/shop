@@ -1,41 +1,35 @@
-# Базовый образ Python
+# Dockerfile
 FROM python:3.11-slim
 
-# ===== Общие настройки Python =====
+# ----- Базовые настройки Python -----
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=on \
     PYTHONPATH=/app
 
-# ===== Системные зависимости (для PostgreSQL / psycopg2) =====
+# ----- Системные зависимости (psycopg2, PostgreSQL client) -----
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# ===== Рабочая директория в контейнере =====
+# ----- Рабочая директория -----
 WORKDIR /app
 
-# ===== Установка Python-зависимостей =====
+# ----- Установка Python-зависимостей -----
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# ===== Копируем весь Django-проект (src содержит manage.py, config, store, accounts) =====
+# ----- Код проекта (для прод-сборок) -----
+# Локально этот код будет ЗАТЕРТ volume-ом ./src:/app,
+# поэтому можно не переживать, что здесь старая версия.
 COPY ./src /app
 
-# Railway обычно прокидывает PORT=8080, но укажем EXPOSE для наглядности
+# Порт по умолчанию (для Railway / gunicorn)
 EXPOSE 8080
 
-# ===== Команда старта контейнера =====
-# 1) применяем миграции
-# 2) сидируем данные (если товары уже есть — твоя команда пропустит)
-# 3) собираем статику
-# 4) запускаем gunicorn на порту $PORT (или 8080 по умолчанию)
-CMD ["sh", "-c", "\
-    python manage.py migrate --noinput && \
-    python manage.py seed_db && \
-    python manage.py collectstatic --noinput && \
-    gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8080} --log-file - \
-    "]
+# ----- Команда по умолчанию (prod-режим) -----
+# Локально в docker-compose мы ПЕРЕОПРЕДЕЛИМ команду на runserver.
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:${PORT:-8080}", "--log-file", "-"]

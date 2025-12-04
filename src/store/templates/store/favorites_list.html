@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное - Магазин</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 24px;
+            color: #2f3640;
+        }
+
+        .logo span {
+            background: #00a046;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .nav a {
+            color: #2f3640;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .nav a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00a046 0%, #00913a 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .content {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e0e0e0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .product-card .category {
+            color: #757575;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .product-card .price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 10px 0;
+        }
+
+        .favorite-remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #e74c3c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span>SHOP</span>
+                <div>Магазин</div>
+            </div>
+            <nav class="nav">
+                <a href="{% url 'index' %}">Главная</a>
+                <a href="{% url 'product_list' %}">Все товары</a>
+                <a href="{% url 'category_list' %}">Категории</a>
+                <a href="{% url 'profile' %}">Профиль</a>
+            </nav>
+        </div>
+
+        <div class="content">
+            <h2 style="margin-bottom: 20px; color: #333;">Избранные товары</h2>
+
+            {% if products %}
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card">
+                    <form method="post" action="{% url 'toggle_favorite' product.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'favorites_list' %}">
+                        <button type="submit" class="favorite-remove-btn" title="Убрать из избранного">❤</button>
+                    </form>
+                    <div class="category">{{ product.category.name }}</div>
+                    <h3>{{ product.name }}</h3>
+                    <div class="price">{{ product.get_effective_price|floatformat:0 }} грн</div>
+                    <a href="{% url 'product_detail' product.id %}" class="btn">Подробнее</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>У вас пока нет избранных товаров.</p>
+                <a href="{% url 'product_list' %}" class="btn" style="margin-top: 20px;">Перейти к покупкам</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>
+
+
+
+
+
+

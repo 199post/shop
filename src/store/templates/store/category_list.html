@@ -28,31 +28,63 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
         }
-        h1 {
-            color: #333;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 24px;
+            color: #2f3640;
+        }
+        .logo span {
+            background: #00a046;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+        .search-bar {
+            flex: 1;
+            margin: 0 20px;
+            display: flex;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px 0 0 6px;
+            font-size: 14px;
+        }
+        .search-bar button {
+            padding: 10px 16px;
+            border: none;
+            background: #00a046;
+            color: #fff;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-weight: 600;
         }
         .nav {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
         }
         .nav a {
-            color: #667eea;
+            color: #2f3640;
             text-decoration: none;
             font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 6px 10px;
+            border-radius: 4px;
             transition: background-color 0.3s;
+            font-size: 14px;
         }
         .nav a:hover {
             background-color: #f0f0f0;
         }
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00a046 0%, #00913a 100%);
             color: white;
             padding: 8px 16px;
             border-radius: 5px;
@@ -70,43 +102,115 @@
         }
         .categories-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
         }
         .category-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: #f8f9fa;
+            color: #2f3640;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: left;
+            transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
             display: block;
+            border: 1px solid #e0e0e0;
         }
         .category-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
         .category-card h2 {
-            margin-bottom: 10px;
-            font-size: 24px;
+            margin-bottom: 6px;
+            font-size: 18px;
         }
         .category-card .count {
-            font-size: 16px;
+            font-size: 13px;
             opacity: 0.9;
+            margin-bottom: 6px;
+        }
+        .subcategory-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .subcategory-pill {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: #e0f5eb;
+            color: #007b2a;
+        }
+        /* Бургер-меню */
+        .burger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .burger span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #2f3640;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+        .mobile-nav {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .mobile-nav a {
+            color: #2f3640;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        @media (max-width: 900px) {
+            .search-bar {
+                display: none;
+            }
+            .burger {
+                display: flex;
+            }
+            .nav {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛍️ Категории товаров</h1>
+            <div style="display:flex; align-items:center;">
+                <div class="burger" onclick="toggleMobileNav()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="logo">
+                    <span>SHOP</span>
+                    <div>Магазин</div>
+                </div>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Я ищу...">
+                <button>Найти</button>
+            </div>
             <nav class="nav">
                 <a href="{% url 'index' %}">Главная</a>
                 <a href="{% url 'product_list' %}">Все товары</a>
                 {% if user.is_authenticated %}
-                    <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                    <a href="{% url 'cart_detail' %}">Корзина ({{ cart_items_count }})</a>
                     <a href="{% url 'profile' %}">Профиль</a>
                     <a href="{% url 'logout' %}" class="btn">Выйти</a>
                 {% else %}
@@ -114,6 +218,18 @@
                     <a href="{% url 'register' %}" class="btn">Регистрация</a>
                 {% endif %}
             </nav>
+        </div>
+        <div id="mobileNav" class="mobile-nav">
+            <a href="{% url 'index' %}">Главная</a>
+            <a href="{% url 'product_list' %}">Все товары</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'cart_detail' %}">Корзина ({{ cart_items_count }})</a>
+                <a href="{% url 'profile' %}">Профиль</a>
+                <a href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+                <a href="{% url 'login' %}">Войти</a>
+                <a href="{% url 'register' %}">Регистрация</a>
+            {% endif %}
         </div>
 
         <div class="content">
@@ -125,6 +241,13 @@
                 <a href="{% url 'product_list' %}?category={{ category.slug }}" class="category-card">
                     <h2>{{ category.name }}</h2>
                     <div class="count">{{ category.products.count }} товаров</div>
+                    {% if category.subcategories.all %}
+                    <div class="subcategory-row">
+                        {% for sub in category.subcategories.all %}
+                        <span class="subcategory-pill">{{ sub.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </a>
                 {% endfor %}
             </div>
@@ -134,4 +257,14 @@
         </div>
     </div>
 </body>
+<script>
+    function toggleMobileNav() {
+        const nav = document.getElementById('mobileNav');
+        if (nav.style.display === 'flex') {
+            nav.style.display = 'none';
+        } else {
+            nav.style.display = 'flex';
+        }
+    }
+</script>
 </html>

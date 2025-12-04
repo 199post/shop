@@ -438,9 +438,9 @@
 
                     <div class="product-stock {% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
                         {% if product.stock > 0 %}
-                        ✓ В наличии: {{ product.stock }} шт.
+                        ✓ В наявності
                         {% else %}
-                        ✗ Нет в наличии
+                        ✗ Немає в наявності
                         {% endif %}
                     </div>
 
@@ -457,6 +457,17 @@
                     <button class="buy-btn" style="background: #ccc; cursor: not-allowed;" disabled>Нет в
                         наличии</button>
                     {% endif %}
+
+                    <form method="post" action="{% url 'toggle_favorite' product.id %}" style="margin-top:15px;"
+                        onsubmit="return handleFavoriteSubmit(event);">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit"
+                            style="background:none;border:none;cursor:pointer;font-size:22px;color:{% if is_favorite %}#e74c3c{% else %}#ccc{% endif %};"
+                            title="Добавить в избранное">
+                            ❤ {% if is_favorite %}В избранном{% else %}В избранное{% endif %}
+                        </button>
+                    </form>
                 </div>
 
 
@@ -473,9 +484,9 @@
                         <div class="price">{{ related_product.price|floatformat:0 }} грн</div>
                         <div class="stock {% if related_product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
                             {% if related_product.stock > 0 %}
-                            В наличии: {{ related_product.stock }} шт.
+                            В наявності
                             {% else %}
-                            Нет в наличии
+                            Немає в наявності
                             {% endif %}
                         </div>
                         <a href="{% url 'product_detail' related_product.id %}">Подробнее</a>
@@ -512,7 +523,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно для неавторизованных пользователей -->
+    <!-- Модальное окно для неавторизованных пользователей (корзина/избранное) -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -521,7 +532,7 @@
             </div>
             <div style="text-align: center; padding: 20px;">
                 <p style="color: #666; font-size: 18px; margin-bottom: 30px;">Пожалуйста, авторизируйтесь для добавления
-                    товаров в корзину</p>
+                    товаров в корзину и избранное</p>
                 <a href="{% url 'login' %}?next={{ request.path }}" class="btn"
                     style="display: inline-block; padding: 15px 40px; font-size: 18px; margin-right: 10px;">Войти</a>
                 <a href="{% url 'register' %}" class="btn"
@@ -540,6 +551,15 @@
             } else {
                 document.getElementById('buyModal').style.display = 'block';
             }
+        }
+
+        function handleFavoriteSubmit(e) {
+            if (!isAuthenticated) {
+                e.preventDefault();
+                document.getElementById('loginModal').style.display = 'block';
+                return false;
+            }
+            return true;
         }
 
         function closeBuyModal() {

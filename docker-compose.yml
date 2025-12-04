@@ -1,11 +1,21 @@
+version: "3.9"
+
 services:
   web:
-    build: .
-    command: sh -c "python manage.py migrate --noinput && python manage.py seed_db && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: >
+      sh -c "
+        python manage.py migrate --noinput &&
+        python manage.py seed_db &&
+        python manage.py collectstatic --noinput &&
+        python manage.py runserver 0.0.0.0:8000
+      "
     volumes:
       - ./src:/app
       - media_data:/app/media
-    working_dir: /app
     ports:
       - "8000:8000"
     env_file:
@@ -16,12 +26,12 @@ services:
 
   db:
     image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: shopdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=shopdb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
     healthcheck:
@@ -35,12 +45,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - ADMINER_DEFAULT_SERVER=db
+      ADMINER_DEFAULT_SERVER: db
     depends_on:
       - db
 
 volumes:
   postgres_data:
   media_data:
-
-

@@ -2,83 +2,204 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db import transaction
-from .models import Product, Category, Cart, CartItem, Order, OrderItem
+from django.db import transaction, models
+from .models import Product, Category, Cart, CartItem, Order, OrderItem, Favorite, Page
+
+
+def _apply_filters_and_sorting(request, qs):
+    """
+    Общая логика фильтрации и сортировки товаров.
+    Поддерживает:
+    - ?min_price=...
+    - ?max_price=...
+    - ?sort=popular|price_asc|price_desc|new
+    """
+    min_price = request.GET.get("min_price")
+    max_price = request.GET.get("max_price")
+    sort = request.GET.get("sort", "popular")
+    query = request.GET.get("q")
+
+    if query:
+        qs = qs.filter(models.Q(name__icontains=query) | models.Q(description__icontains=query))
+
+    if min_price:
+        qs = qs.filter(price__gte=min_price)
+    if max_price:
+        qs = qs.filter(price__lte=max_price)
+
+    if sort == "price_asc":
+        qs = qs.order_by("price")
+    elif sort == "price_desc":
+        qs = qs.order_by("-price")
+    elif sort == "new":
+        qs = qs.order_by("-created_at")
+    else:
+        # popular – пока сортируем по дате создания (можно расширить метрикой продаж/просмотров)
+        qs = qs.order_by("-created_at")
+
+    return qs
+
 
 def index(request):
-    """Главная страница с последними товарами"""
-    products = Product.objects.all()[:8]  # Последние 8 товаров
-    categories = Category.objects.all()
-    
-    # Получаем количество товаров в корзине для авторизованного пользователя
+    """Главная страница с товарами, фильтрами и сортировкой."""
+    products = Product.objects.all()
+
+    # Фильтр по категории и подкатегории
+    category_slug = request.GET.get("category")
+    subcategory_slug = request.GET.get("subcategory")
+    selected_category = None
+    selected_subcategory = None
+
+    root_categories = Category.objects.filter(parent__isnull=True)
+
+    if category_slug:
+        selected_category = get_object_or_404(
+            Category, slug=category_slug, parent__isnull=True
+        )
+        products = products.filter(
+            category__in=Category.objects.filter(
+                models.Q(id=selected_category.id) | models.Q(parent=selected_category)
+            )
+        )
+
+        if subcategory_slug:
+            selected_subcategory = get_object_or_404(
+                Category, slug=subcategory_slug, parent=selected_category
+            )
+            products = products.filter(category=selected_subcategory)
+
+    products = _apply_filters_and_sorting(request, products)
+
+    # Применяем сортировку/фильтры
+    products = _apply_filters_and_sorting(request, products)
+
+    # Показываем только первые 12 товаров на главной
+    products = products[:12]
+
+    # Получаем количество товаров в корзине и избранное для авторизованного пользователя
     cart_items_count = 0
+    favorite_ids = set()
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
         cart_items_count = cart.get_total_items()
-    
-    return render(request, 'store/index.html', {
-        'products': products,
-        'categories': categories,
-        'cart_items_count': cart_items_count,
-    })
+        favorite_ids = set(
+            Favorite.objects.filter(user=request.user, product__in=products).values_list(
+                "product_id", flat=True
+            )
+        )
+
+    context = {
+        "products": products,
+        "root_categories": root_categories,
+        "selected_category": selected_category,
+        "selected_subcategory": selected_subcategory,
+        "cart_items_count": cart_items_count,
+        "favorite_ids": favorite_ids,
+        "current_sort": request.GET.get("sort", "popular"),
+        "min_price": request.GET.get("min_price", ""),
+        "min_price": request.GET.get("min_price", ""),
+        "max_price": request.GET.get("max_price", ""),
+        "query": request.GET.get("q", ""),
+    }
+    return render(request, "store/index.html", context)
+
 
 def product_list(request):
-    """Список всех товаров"""
+    """Список всех товаров с фильтрами, категориями и подкатегориями."""
     products = Product.objects.all()
-    categories = Category.objects.all()
-    category_slug = request.GET.get('category')
-    
+    root_categories = Category.objects.filter(parent__isnull=True).prefetch_related('subcategories')
+
+    category_slug = request.GET.get("category")
+    subcategory_slug = request.GET.get("subcategory")
+    selected_category = None
+    selected_subcategory = None
+
     if category_slug:
-        category = get_object_or_404(Category, slug=category_slug)
-        products = products.filter(category=category)
-        selected_category = category
-    else:
-        selected_category = None
-    
-    # Получаем количество товаров в корзине
+        selected_category = get_object_or_404(
+            Category, slug=category_slug, parent__isnull=True
+        )
+        products = products.filter(
+            category__in=Category.objects.filter(
+                models.Q(id=selected_category.id) | models.Q(parent=selected_category)
+            )
+        )
+
+        if subcategory_slug:
+            selected_subcategory = get_object_or_404(
+                Category, slug=subcategory_slug, parent=selected_category
+            )
+            products = products.filter(category=selected_subcategory)
+
+    products = _apply_filters_and_sorting(request, products)
+
+    # Получаем количество товаров в корзине и избранное
     cart_items_count = 0
+    favorite_ids = set()
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
         cart_items_count = cart.get_total_items()
-    
-    return render(request, 'store/product_list.html', {
-        'products': products,
-        'categories': categories,
-        'selected_category': selected_category,
-        'cart_items_count': cart_items_count,
-    })
+        favorite_ids = set(
+            Favorite.objects.filter(user=request.user, product__in=products).values_list(
+                "product_id", flat=True
+            )
+        )
+
+    context = {
+        "products": products,
+        "root_categories": root_categories,
+        "selected_category": selected_category,
+        "selected_subcategory": selected_subcategory,
+        "cart_items_count": cart_items_count,
+        "favorite_ids": favorite_ids,
+        "current_sort": request.GET.get("sort", "popular"),
+        "min_price": request.GET.get("min_price", ""),
+        "max_price": request.GET.get("max_price", ""),
+        "query": request.GET.get("q", ""),
+        "min_price": request.GET.get("min_price", ""),
+        "max_price": request.GET.get("max_price", ""),
+    }
+    return render(request, "store/product_list.html", context)
 
 def product_detail(request, product_id):
     """Детальная страница товара"""
     product = get_object_or_404(Product, id=product_id)
     related_products = Product.objects.filter(category=product.category).exclude(id=product_id)[:4]
     
-    # Получаем количество товаров в корзине
+    # Получаем количество товаров в корзине и статус избранного
     cart_items_count = 0
+    is_favorite = False
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
         cart_items_count = cart.get_total_items()
+        is_favorite = Favorite.objects.filter(user=request.user, product=product).exists()
     
     return render(request, 'store/product_detail.html', {
         'product': product,
         'related_products': related_products,
         'cart_items_count': cart_items_count,
+        'is_favorite': is_favorite,
     })
 
 def category_list(request):
-    """Список всех категорий"""
-    categories = Category.objects.all()
-    
+    """Список корневых категорий и их подкатегорий."""
+    root_categories = Category.objects.filter(parent__isnull=True).prefetch_related(
+        "subcategories", "products"
+    )
+
     # Получаем количество товаров в корзине
     cart_items_count = 0
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
         cart_items_count = cart.get_total_items()
-    
-    return render(request, 'store/category_list.html', {
-        'categories': categories,
-        'cart_items_count': cart_items_count,
-    })
+
+    return render(
+        request,
+        "store/category_list.html",
+        {
+            "categories": root_categories,
+            "cart_items_count": cart_items_count,
+        },
+    )
 
 
 @login_required
@@ -233,3 +354,78 @@ def order_list(request):
         'cart_items_count': cart_items_count,
     })
 
+
+@login_required
+def favorites_list(request):
+    """Список избранных товаров пользователя."""
+    favorites = Favorite.objects.filter(user=request.user).select_related("product", "product__category")
+    products = [fav.product for fav in favorites]
+
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_items_count = cart.get_total_items()
+
+    return render(
+        request,
+        "store/favorites_list.html",
+        {
+            "products": products,
+            "cart_items_count": cart_items_count,
+        },
+    )
+
+
+@login_required
+def toggle_favorite(request, product_id):
+    """
+    Переключение избранного для товара.
+    Ожидает POST-запрос. После изменения возвращает пользователя назад.
+    """
+    product = get_object_or_404(Product, id=product_id)
+
+    favorite, created = Favorite.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        favorite.delete()
+        messages.info(request, f"{product.name} удалён из избранного.")
+    else:
+        messages.success(request, f"{product.name} добавлен в избранное.")
+
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or redirect("product_detail", product_id=product.id).url
+    return redirect(next_url)
+
+
+def search_suggestions(request):
+    """API endpoint для автодоповнення пошуку."""
+    query = request.GET.get('q', '')
+    
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+    
+    # Шукаємо товари за назвою
+    products = Product.objects.filter(
+        name__icontains=query
+    ).values('id', 'name', 'price')[:10]
+    
+    results = [
+        {
+            'id': p['id'],
+            'name': p['name'],
+            'price': float(p['price'])
+        }
+        for p in products
+    ]
+    
+    return JsonResponse({'results': results})
+
+def page_detail(request, slug):
+    """Відображення статичної сторінки."""
+    page = get_object_or_404(Page, slug=slug)
+    
+    cart_items_count = 0
+    if request.user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_items_count = cart.get_total_items()
+        
+    return render(request, 'store/page_detail.html', {
+        'page': page,
+        'cart_items_count': cart_items_count
+    })

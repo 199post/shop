@@ -6,6 +6,7 @@ urlpatterns = [
     path('products/', views.product_list, name='product_list'),
     path('products/<int:product_id>/', views.product_detail, name='product_detail'),
     path('categories/', views.category_list, name='category_list'),
+    path('mobile-phones/', views.product_list, {'category': 'mobile-phones'}, name='mobile_phones'),  # страница мобильных
     
     # Корзина
     path('cart/', views.cart_detail, name='cart_detail'),
@@ -17,5 +18,14 @@ urlpatterns = [
     # Заказы
     path('orders/', views.order_list, name='order_list'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
-]
 
+    # Избранное
+    path('favorites/', views.favorites_list, name='favorites_list'),
+    path('favorites/toggle/<int:product_id>/', views.toggle_favorite, name='toggle_favorite'),
+    
+    # API
+    path('api/search/', views.search_suggestions, name='search_suggestions'),
+
+    # Pages
+    path('page/<slug:slug>/', views.page_detail, name='page_detail'),
+]

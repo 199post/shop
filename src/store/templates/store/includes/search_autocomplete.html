@@ -1,0 +1,142 @@
+<style>
+    /* Автодоповнення пошуку */
+    .search-bar {
+        position: relative;
+    }
+
+    .search-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: none;
+    }
+
+    .search-suggestions.active {
+        display: block;
+    }
+
+    .search-suggestion-item {
+        padding: 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .search-suggestion-item:hover {
+        background: #f8f9fa;
+    }
+
+    .search-suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .suggestion-name {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .suggestion-price {
+        font-size: 13px;
+        color: #00a046;
+        font-weight: 600;
+    }
+
+    .search-loading {
+        padding: 12px;
+        text-align: center;
+        color: #666;
+        font-size: 13px;
+    }
+
+    .search-no-results {
+        padding: 12px;
+        text-align: center;
+        color: #999;
+        font-size: 13px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInputs = document.querySelectorAll('.search-bar input[name="q"]');
+
+        searchInputs.forEach(searchInput => {
+            const searchForm = searchInput.closest('.search-bar');
+            let suggestionsContainer = searchForm.querySelector('.search-suggestions');
+
+            // Створюємо контейнер для підказок, якщо його немає
+            if (!suggestionsContainer) {
+                suggestionsContainer = document.createElement('div');
+                suggestionsContainer.className = 'search-suggestions';
+                searchForm.appendChild(suggestionsContainer);
+            }
+
+            let searchTimeout = null;
+
+            searchInput.addEventListener('input', function (e) {
+                const query = e.target.value.trim();
+
+                clearTimeout(searchTimeout);
+
+                if (query.length < 2) {
+                    suggestionsContainer.classList.remove('active');
+                    return;
+                }
+
+                // Показуємо індикатор завантаження
+                suggestionsContainer.innerHTML = '<div class="search-loading">Пошук...</div>';
+                suggestionsContainer.classList.add('active');
+
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+                        const data = await response.json();
+
+                        if (data.results.length === 0) {
+                            suggestionsContainer.innerHTML = '<div class="search-no-results">Нічого не знайдено</div>';
+                        } else {
+                            suggestionsContainer.innerHTML = data.results.map(item => `
+                            <a href="/products/${item.id}/" class="search-suggestion-item">
+                                <span class="suggestion-name">${item.name}</span>
+                                <span class="suggestion-price">${Math.floor(item.price)} грн</span>
+                            </a>
+                        `).join('');
+                        }
+                    } catch (error) {
+                        console.error('Помилка пошуку:', error);
+                        suggestionsContainer.classList.remove('active');
+                    }
+                }, 300); // Затримка 300мс перед запитом
+            });
+
+            // Закриваємо підказки при кліку поза ними
+            document.addEventListener('click', function (e) {
+                if (!searchForm.contains(e.target)) {
+                    suggestionsContainer.classList.remove('active');
+                }
+            });
+
+            // Не закриваємо при фокусі на полі пошуку
+            searchInput.addEventListener('focus', function () {
+                if (this.value.length >= 2 && suggestionsContainer.children.length > 0) {
+                    suggestionsContainer.classList.add('active');
+                }
+            });
+        });
+    });
+</script>

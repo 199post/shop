@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nice-Price - Інтернет-магазин електроніки{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #00a046;
+            --primary-green-hover: #008a3a;
+            --bg-light: #f6f6f6;
+            --text-dark: #3e4152;
+            --header-bg: #2874f0;
+            --header-text: #fff;
+            --footer-bg: #fff;
+            --footer-text: #3e4152;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 8px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            height: 56px;
+        }
+
+        /* Burger Menu */
+        .burger-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            gap: 8px;
+        }
+
+        .logo img {
+            height: 32px;
+        }
+
+        /* Catalog Button */
+        .catalog-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0 16px;
+            height: 40px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .catalog-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Search */
+        .search-form {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 40px;
+            padding: 0 48px 0 16px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            font-size: 14px;
+        }
+
+        .search-btn {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            padding: 0 16px;
+            height: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-green-hover);
+        }
+
+        /* User Actions */
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .action-btn i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--primary-green);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px 16px;
+            width: 100%;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 40px 0 20px;
+            border-top: 1px solid #e9e9e9;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+        }
+
+        .footer-section h3 {
+            font-size: 14px;
+            color: #797878;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-green);
+            text-decoration: underline;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .social-links a {
+            color: var(--text-dark);
+            font-size: 24px;
+            text-decoration: none;
+        }
+
+        .app-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .app-btn {
+            background: #000;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+        }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 300px;
+            height: 100%;
+            background: white;
+            z-index: 2001;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.active {
+            left: 0;
+        }
+
+        .mobile-menu-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-menu-content {
+            padding: 16px;
+        }
+
+        .mobile-cat-link {
+            display: block;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .mobile-subcat-link {
+            display: block;
+            padding: 8px 0 8px 16px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .catalog-btn {
+                display: none;
+            }
+
+            .search-form {
+                display: none;
+                /* Hide on mobile for now or make it collapsible */
+            }
+
+            .header-container {
+                justify-content: space-between;
+            }
+        }
+
+        /* Utility Classes */
+        .btn-green {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .btn-green:hover {
+            background-color: var(--primary-green-hover);
+        }
+
+        /* Background pattern */
+        body {
+            background-color: #f0f8f0;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(100, 200, 100, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(100, 150, 200, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(150, 180, 150, 0.03) 0%, transparent 60%);
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("/static/store/gadgets_pattern.png");
+            background-repeat: repeat;
+            background-size: 400px 400px;
+            opacity: 0.08;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header animation */
+        .header-animation {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 20px;
+        }
+
+        .thumbs-up-icon {
+            font-size: 28px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            25% {
+                transform: translateY(-10px) rotate(15deg);
+            }
+
+            50% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            75% {
+                transform: translateY(-5px) rotate(-10deg);
+            }
+        }
+
+        .promo-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 5px 12px;
+            border-radius: 20px;
+            animation: fadeInOut 3s ease-in-out infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes fadeInOut {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-animation {
+                display: none;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" id="mobileOverlay" onclick="toggleMenu()"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="logo">Nice-Price</div>
+            <button onclick="toggleMenu()" style="background:none; border:none; color:white; font-size:20px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-content">
+            {% if user.is_authenticated %}
+            <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+                <div style="font-weight: bold; margin-bottom: 5px;">{{ user.username }}</div>
+                <a href="{% url 'profile' %}" style="color: var(--primary-green);">Мій кабінет</a>
+            </div>
+            {% else %}
+            <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+                <a href="{% url 'login' %}" class="btn-green" style="width:100%; text-align:center;">Увійти</a>
+                <div style="margin-top: 10px; text-align: center;">
+                    <a href="{% url 'register' %}" style="color: #666;">Зареєструватися</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <h3>Каталог товарів</h3>
+            {% for category in all_categories %}
+            <div class="mobile-category-item">
+                <a href="{% url 'product_list' %}?category={{ category.slug }}" class="mobile-cat-link">{{ category.name
+                    }}</a>
+                {% for sub in category.subcategories.all %}
+                <a href="{% url 'product_list' %}?category={{ category.slug }}&subcategory={{ sub.slug }}"
+                    class="mobile-subcat-link">{{ sub.name }}</a>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <button class="burger-btn" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <a href="{% url 'index' %}" class="logo">
+                Nice-Price
+            </a>
+
+            <div class="header-animation">
+                <span class="thumbs-up-icon">👍</span>
+                <span class="promo-text">Дешевше не знайдеш</span>
+            </div>
+
+            <button class="catalog-btn" onclick="toggleMenu()">
+                <i class="fas fa-th-large"></i>
+                Каталог
+            </button>
+
+            <form class="search-form" action="{% url 'product_list' %}" method="get">
+                <input type="text" name="q" class="search-input" placeholder="Я шукаю..."
+                    value="{{ query|default:'' }}">
+                <button type="submit" class="search-btn">Знайти</button>
+                {% include 'store/includes/search_autocomplete.html' %}
+            </form>
+
+            <div class="user-actions">
+                {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="action-btn">
+                    <i class="far fa-user"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="action-btn">
+                    <i class="far fa-user"></i>
+                </a>
+                {% endif %}
+
+                <a href="{% url 'favorites_list' %}" class="action-btn">
+                    <i class="far fa-heart"></i>
+                </a>
+
+                <a href="{% url 'cart_detail' %}" class="action-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                    {% if cart_items_count > 0 %}
+                    <span class="badge">{{ cart_items_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% if messages %}
+        <div style="margin-bottom: 20px;">
+            {% for message in messages %}
+            <div
+                style="padding: 15px; border-radius: 4px; margin-bottom: 10px; 
+                        {% if message.tags == 'error' %}background: #f8d7da; color: #721c24;{% else %}background: #d4edda; color: #155724;{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            {% for section in footer_sections %}
+            <div class="footer-section">
+                <h3>{{ section.title }}</h3>
+                <ul class="footer-links">
+                    {% for link in section.links.all %}
+                    <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+
+            <div class="footer-section">
+                <h3>Ми в соціальних мережах</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+
+                <div class="app-buttons">
+                    <a href="#" class="app-btn">
+                        <i class="fab fa-google-play"></i>
+                        <div>
+                            <div style="font-size: 10px;">Завантажити в</div>
+                            <div style="font-weight: bold;">Google Play</div>
+                        </div>
+                    </a>
+                    <a href="#" class="app-btn">
+                        <i class="fab fa-apple"></i>
+                        <div>
+                            <div style="font-size: 10px;">Завантажити в</div>
+                            <div style="font-weight: bold;">App Store</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 40px; font-size: 12px; color: #999;">
+            © 2025 Nice-Price. Всі права захищені.
+        </div>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('mobileOverlay');
+            menu.classList.toggle('active');
+            overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>
