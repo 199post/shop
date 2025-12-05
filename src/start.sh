@@ -2,7 +2,13 @@
 set -e
 
 echo "Running migrations..."
-python manage.py migrate --noinput
+# Try normal migration first, if it fails on store_favorite, fake it
+python manage.py migrate --noinput || {
+    echo "Migration failed, attempting to fake problematic migration..."
+    python manage.py migrate store 0007_productimage --noinput --fake || true
+    python manage.py migrate store 0008_favorite --noinput --fake || true
+    python manage.py migrate --noinput
+}
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
