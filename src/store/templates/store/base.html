@@ -82,27 +82,6 @@
             height: 32px;
         }
 
-        /* Catalog Button */
-        .catalog-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 0 16px;
-            height: 40px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
-
-        .catalog-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
         /* Search */
         .search-form {
             flex: 1;
@@ -275,7 +254,8 @@
             left: -320px;
             width: 300px;
             height: 100%;
-            background: white;
+            background: #fff;
+            /* Solid white background */
             z-index: 2001;
             transition: left 0.3s ease;
             overflow-y: auto;
@@ -318,10 +298,6 @@
         }
 
         @media (max-width: 768px) {
-            .catalog-btn {
-                display: none;
-            }
-
             .search-form {
                 display: none;
                 /* Hide on mobile for now or make it collapsible */
@@ -376,10 +352,65 @@
 
         /* Header animation */
         .header-animation {
-            display: inline-flex;
+            position: relative;
+            width: 220px;
+            height: 32px;
+            margin-left: 20px;
+        }
+
+        .anim-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
             align-items: center;
             gap: 10px;
-            margin-left: 20px;
+            opacity: 0;
+        }
+
+        .anim-content:nth-child(1) {
+            animation: fade1 8s infinite;
+        }
+
+        .anim-content:nth-child(2) {
+            animation: fade2 8s infinite;
+        }
+
+        @keyframes fade1 {
+
+            0%,
+            45% {
+                opacity: 1;
+                z-index: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 0;
+                z-index: 0;
+            }
+        }
+
+        @keyframes fade2 {
+
+            0%,
+            45% {
+                opacity: 0;
+                z-index: 0;
+            }
+
+            50%,
+            95% {
+                opacity: 1;
+                z-index: 1;
+            }
+
+            100% {
+                opacity: 0;
+                z-index: 0;
+            }
         }
 
         .thumbs-up-icon {
@@ -395,7 +426,7 @@
             }
 
             25% {
-                transform: translateY(-10px) rotate(15deg);
+                transform: translateY(-5px) rotate(15deg);
             }
 
             50% {
@@ -403,7 +434,7 @@
             }
 
             75% {
-                transform: translateY(-5px) rotate(-10deg);
+                transform: translateY(-2px) rotate(-10deg);
             }
         }
 
@@ -414,22 +445,7 @@
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             padding: 5px 12px;
             border-radius: 20px;
-            animation: fadeInOut 3s ease-in-out infinite;
             white-space: nowrap;
-        }
-
-        @keyframes fadeInOut {
-
-            0%,
-            100% {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-
-            50% {
-                opacity: 1;
-                transform: scale(1);
-            }
         }
 
         @media (max-width: 768px) {
@@ -470,8 +486,7 @@
             <h3>Каталог товарів</h3>
             {% for category in all_categories %}
             <div class="mobile-category-item">
-                <a href="{% url 'product_list' %}?category={{ category.slug }}" class="mobile-cat-link">{{ category.name
-                    }}</a>
+                <a href="{% url 'product_list' %}?category={{ category.slug }}" class="mobile-cat-link">{{ category.name }}</a>
                 {% for sub in category.subcategories.all %}
                 <a href="{% url 'product_list' %}?category={{ category.slug }}&subcategory={{ sub.slug }}"
                     class="mobile-subcat-link">{{ sub.name }}</a>
@@ -493,14 +508,15 @@
             </a>
 
             <div class="header-animation">
-                <span class="thumbs-up-icon">👍</span>
-                <span class="promo-text">Дешевше не знайдеш</span>
+                <div class="anim-content">
+                    <span class="thumbs-up-icon">👍</span>
+                    <span class="promo-text">Дешевше не знайдеш</span>
+                </div>
+                <div class="anim-content">
+                    <span class="thumbs-up-icon">🛒</span>
+                    <span class="promo-text">Купуй зараз</span>
+                </div>
             </div>
-
-            <button class="catalog-btn" onclick="toggleMenu()">
-                <i class="fas fa-th-large"></i>
-                Каталог
-            </button>
 
             <form class="search-form" action="{% url 'product_list' %}" method="get">
                 <input type="text" name="q" class="search-input" placeholder="Я шукаю..."

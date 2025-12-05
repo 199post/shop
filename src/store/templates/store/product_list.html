@@ -11,122 +11,346 @@
 {% endif %}
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    .sidebar {
+        width: 250px;
+        flex-shrink: 0;
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-title {
+        margin-bottom: 16px;
+        font-size: 18px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 8px;
+    }
+
+    .category-item {
+        margin-bottom: 12px;
+    }
+
+    .category-link {
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .category-link.active {
+        color: #00a046;
+    }
+
+    .subcategory-container {
+        padding-left: 12px;
+    }
+
+    .subcategory-link {
+        text-decoration: none;
+        color: #666;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .subcategory-link.active {
+        color: #00a046;
+    }
+
+    .sort-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .sort-select {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s;
+        height: 100%;
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #f84147;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 12px;
+        z-index: 1;
+    }
+
+    .product-image-container {
+        position: relative;
+        margin-bottom: 16px;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-category-name {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 4px;
+    }
+
+    .product-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+        flex: 1;
+        line-height: 1.4;
+    }
+
+    .product-title a {
+        text-decoration: none;
+        color: #333;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .price-container {
+        margin-bottom: 12px;
+    }
+
+    .price-wrapper {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .sale-price {
+        color: #f84147;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .regular-price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .stock-status {
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    .stock-status.in-stock {
+        color: #28a745;
+    }
+
+    .stock-status.out-of-stock {
+        color: #dc3545;
+    }
+
+    .buttons-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn-buy {
+        flex: 1;
+        background: #00a046;
+        color: white;
+        text-decoration: none;
+        padding: 6px;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background 0.2s;
+    }
+
+    .btn-favorite {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 0;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">
-            {% if selected_subcategory %}
-            {{ selected_subcategory.name }}
-            {% elif selected_category %}
-            {{ selected_category.name }}
-            {% else %}
-            Всі товари
-            {% endif %}
-        </h2>
-
-        <div class="sort-controls">
-            <select id="sortSelect" onchange="updateSort(this.value)"
-                style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
-                <option value="popular">За популярністю</option>
-                <option value="price_asc">Від дешевих до дорогих</option>
-                <option value="price_desc">Від дорогих до дешевих</option>
-                <option value="new">Новинки</option>
-            </select>
-        </div>
-    </div>
-
-    {% if products %}
-    <div class="products-grid"
-        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
-        {% for product in products %}
-        <div class="product-card"
-            style="background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; display: flex; flex-direction: column; transition: transform 0.2s;">
-
-            {% if product.has_discount %}
-            <div class="discount-badge"
-                style="position: absolute; top: 10px; left: 10px; background: #f84147; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; z-index: 1;">
-                -{{ product.get_discount_percentage }}%
-            </div>
-            {% endif %}
-
-            <div
-                style="position: relative; margin-bottom: 16px; height: 200px; display: flex; align-items: center; justify-content: center;">
-                {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                    style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                {% else %}
-                <div
-                    style="width: 100%; height: 100%; background-color: {{ product.category.name|get_category_placeholder_color }}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas {{ product.category.name|get_category_placeholder_icon }}"
-                        style="font-size: 60px; color: white; opacity: 0.7;"></i>
+<div class="container" style="display: flex; gap: 20px; align-items: flex-start;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h3 class="sidebar-title">Каталог товарів</h3>
+        <div class="categories-list">
+            {% for category in all_categories %}
+            <div class="category-item">
+                <a href="{% url 'product_list' %}?category={{ category.slug }}"
+                    class="category-link {% if selected_category.slug == category.slug %}active{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% if category.subcategories.all %}
+                <div class="subcategory-container">
+                    {% for sub in category.subcategories.all %}
+                    <a href="{% url 'product_list' %}?category={{ category.slug }}&subcategory={{ sub.slug }}"
+                        class="subcategory-link {% if selected_subcategory.slug == sub.slug %}active{% endif %}">
+                        {{ sub.name }}
+                    </a>
+                    {% endfor %}
                 </div>
                 {% endif %}
             </div>
+            {% endfor %}
+        </div>
+    </aside>
 
-            <div class="category" style="font-size: 12px; color: #666; margin-bottom: 4px;">
-                {{ product.category.name }}
+    <!-- Main Content -->
+    <div class="main-content" style="flex: 1;">
+        <div class="sort-container">
+            <div class="sort-controls">
+                <select id="sortSelect" onchange="updateSort(this.value)" class="sort-select">
+                    <option value="popular">За популярністю</option>
+                    <option value="price_asc">Від дешевих до дорогих</option>
+                    <option value="price_desc">Від дорогих до дешевих</option>
+                    <option value="new">Новинки</option>
+                </select>
             </div>
+        </div>
 
-            <h3 style="font-size: 16px; margin-bottom: 8px; flex: 1;">
-                <a href="{% url 'product_detail' product.id %}"
-                    style="text-decoration: none; color: #333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                    {{ product.name }}
-                </a>
-            </h3>
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
 
-            <div class="price-container" style="margin-bottom: 12px;">
                 {% if product.has_discount %}
-                <div style="display: flex; align-items: baseline; gap: 8px;">
-                    <div class="original-price" style="text-decoration: line-through; color: #999; font-size: 14px;">
+                <div class="discount-badge">
+                    -{{ product.get_discount_percentage }}%
+                </div>
+                {% endif %}
+
+                <div class="product-image-container">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                    {% else %}
+                    <div class="placeholder-image"
+                        style="background-color: {{ product.category.name|get_category_placeholder_color }};">
+                        <i class="fas {{ product.category.name|get_category_placeholder_icon }}"
+                            style="font-size: 50px; color: white; opacity: 0.7;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="product-category-name">
+                    {{ product.category.name }}
+                </div>
+
+                <h3 class="product-title">
+                    <a href="{% url 'product_detail' product.id %}">
+                        {{ product.name }}
+                    </a>
+                </h3>
+
+                <div class="price-container">
+                    {% if product.has_discount %}
+                    <div class="price-wrapper">
+                        <div class="original-price">
+                            {{ product.price|floatformat:0 }} ₴
+                        </div>
+                        <div class="sale-price">
+                            {{ product.sale_price|floatformat:0 }} ₴
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="regular-price">
                         {{ product.price|floatformat:0 }} ₴
                     </div>
-                    <div class="sale-price" style="color: #f84147; font-size: 20px; font-weight: bold;">
-                        {{ product.sale_price|floatformat:0 }} ₴
-                    </div>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="regular-price" style="font-size: 20px; font-weight: bold; color: #333;">
-                    {{ product.price|floatformat:0 }} ₴
+
+                <div class="stock-status {% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                    {% if product.stock > 0 %}
+                    <i class="fas fa-check-circle"></i> В наявності
+                    {% else %}
+                    <i class="fas fa-times-circle"></i> Немає в наявності
+                    {% endif %}
                 </div>
-                {% endif %}
-            </div>
 
-            <div class="stock {% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}"
-                style="font-size: 12px; margin-bottom: 12px; color: {% if product.stock > 0 %}#28a745{% else %}#dc3545{% endif %};">
-                {% if product.stock > 0 %}
-                <i class="fas fa-check-circle"></i> В наявності
-                {% else %}
-                <i class="fas fa-times-circle"></i> Немає в наявності
-                {% endif %}
-            </div>
+                <div class="buttons-container">
+                    <a href="{% url 'product_detail' product.id %}" class="btn-buy">
+                        <i class="fas fa-shopping-cart"></i> Купити
+                    </a>
 
-            <div class="buttons-container" style="display: flex; gap: 10px; align-items: center;">
-                <a href="{% url 'product_detail' product.id %}" class="btn-buy"
-                    style="flex: 1; background: #00a046; color: white; text-decoration: none; padding: 8px; border-radius: 4px; text-align: center; font-weight: 500; transition: background 0.2s;">
-                    <i class="fas fa-shopping-cart"></i> Купити
-                </a>
-
-                <form method="post" action="{% url 'toggle_favorite' product.id %}"
-                    onsubmit="return handleFavoriteSubmit(event);" style="margin: 0;">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                    <button type="submit"
-                        style="background: none; border: none; cursor: pointer; font-size: 24px; color: {% if favorite_ids and product.id in favorite_ids %}#f84147{% else %}#ccc{% endif %}; padding: 0;"
-                        title="В обране">
-                        <i
-                            class="{% if favorite_ids and product.id in favorite_ids %}fas{% else %}far{% endif %} fa-heart"></i>
-                    </button>
-                </form>
+                    <form method="post" action="{% url 'toggle_favorite' product.id %}"
+                        onsubmit="return handleFavoriteSubmit(event);" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="btn-favorite"
+                            style="color: {% if favorite_ids and product.id in favorite_ids %}#f84147{% else %}#ccc{% endif %};"
+                            title="В обране">
+                            <i
+                                class="{% if favorite_ids and product.id in favorite_ids %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+        {% else %}
+        <div class="no-results">
+            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
+            <p>Товари не знайдено.</p>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div style="text-align: center; padding: 40px; color: #666;">
-        <i class="fas fa-search" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
-        <p>Товари не знайдено.</p>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 
@@ -136,7 +360,7 @@
     const currentSort = "{{ current_sort|default:'popular' }}";
 
     // true/false как JS-boolean
-    const isAuthenticated = {{ user.is_authenticated|lower }};
+    const isAuthenticated = {{ user.is_authenticated| lower }};
 
     // Выставляем selected у <select> на основании currentSort
     (function () {

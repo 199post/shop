@@ -210,14 +210,12 @@
 
         .sidebar {
             display: none;
-            /* Hide sidebar on mobile for now */
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-
 
 <div class="layout">
     <aside class="sidebar">
@@ -262,8 +260,6 @@
     <div>
         <h2 style="margin-bottom: 15px; color: #333;">Товари</h2>
 
-
-
         {% if products %}
         <div class="products-grid">
             {% for product in products %}
@@ -286,8 +282,7 @@
                 {% endif %}
 
                 <div class="category">{{ product.category.name }}</div>
-                <h3><a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: inherit;">{{
-                        product.name }}</a></h3>
+                <h3><a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: inherit;">{{ product.name }}</a></h3>
                 <div class="price-container">
                     {% if product.has_discount %}
                     <div class="original-price">{{ product.price|floatformat:0 }} ₴</div>
