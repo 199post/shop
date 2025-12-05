@@ -15,20 +15,13 @@ python manage.py collectstatic --noinput
 
 echo "Checking if data needs to be seeded..."
 python manage.py shell -c "
-from store.models import Category, Page
+from store.models import Category
 if Category.objects.count() == 0:
     print('No categories found, running seed...')
     from django.core.management import call_command
     call_command('seed_new_categories')
 else:
-    print('Categories exist, skipping category seed.')
-
-if Page.objects.count() == 0:
-    print('No pages found, running page seed...')
-    from django.core.management import call_command
-    call_command('seed_pages')
-else:
-    print('Pages exist, skipping page seed.')
+    print('Data already exists, skipping seed.')
 "
 
 echo "Starting gunicorn..."
