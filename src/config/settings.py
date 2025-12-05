@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,10 +17,10 @@ ALLOWED_HOSTS = os.environ.get(
     "localhost 127.0.0.1 [::1]"
 ).split()
 
-# Доверенные origin'ы для CSRF (Railway + localhost)
+# Доверенные origin'ы для CSRF (Render + Railway + localhost)
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
-    "https://localhost http://localhost https://*.railway.app"
+    "https://localhost http://localhost https://*.railway.app https://*.onrender.com"
 ).split()
 
 # Чтобы Django правильно понимал HTTPS за прокси Railway
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -72,24 +74,24 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # ===================== БАЗА ДАННЫХ =====================
 
-# Здесь БД полностью управляется переменными окружения.
-# Чтобы везде был PostgreSQL, нужно ЗАДАТЬ:
-#   DB_ENGINE=django.db.backends.postgresql
-#   DB_NAME=...
-#   DB_USER=...
-#   DB_PASSWORD=...
-#   DB_HOST=...
-#   DB_PORT=5432
-DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("DB_NAME", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("DB_USER", ""),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", ""),
-        "PORT": os.environ.get("DB_PORT", ""),
+# Render передаёт DATABASE_URL, а для локальной разработки используем отдельные переменные
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
+            "NAME": os.environ.get("DB_NAME", BASE_DIR / "db.sqlite3"),
+            "USER": os.environ.get("DB_USER", ""),
+            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+            "HOST": os.environ.get("DB_HOST", ""),
+            "PORT": os.environ.get("DB_PORT", ""),
+        }
+    }
 
 # ===================== ПАРОЛИ =====================
 
