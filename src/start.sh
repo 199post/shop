@@ -1,28 +1,25 @@
 #!/bin/bash
 set -e
 
+export DJANGO_SETTINGS_MODULE=config.settings
+
 echo "Running migrations..."
-# Try normal migration first, if it fails on store_favorite, fake it
 python manage.py migrate --noinput || {
     echo "Migration failed, attempting to fake problematic migration..."
-    python manage.py migrate store 0007_productimage --noinput --fake || true
     python manage.py migrate store 0008_favorite --noinput --fake || true
-    python manage.py migrate --noinput
+    python manage.py migrate --noinput || true
 }
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Check if categories exist, if not - seed
 echo "Checking if data needs to be seeded..."
-python -c "
-import django
-django.setup()
+python manage.py shell -c "
 from store.models import Category
 if Category.objects.count() == 0:
     print('No categories found, running seed...')
-    import subprocess
-    subprocess.run(['python', 'manage.py', 'seed_new_categories'], check=True)
+    from django.core.management import call_command
+    call_command('seed_new_categories')
 else:
     print('Data already exists, skipping seed.')
 "
