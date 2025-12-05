@@ -486,7 +486,8 @@
             <h3>Каталог товарів</h3>
             {% for category in all_categories %}
             <div class="mobile-category-item">
-                <a href="{% url 'product_list' %}?category={{ category.slug }}" class="mobile-cat-link">{{ category.name }}</a>
+                <a href="{% url 'product_list' %}?category={{ category.slug }}" class="mobile-cat-link">{{ category.name
+                    }}</a>
                 {% for sub in category.subcategories.all %}
                 <a href="{% url 'product_list' %}?category={{ category.slug }}&subcategory={{ sub.slug }}"
                     class="mobile-subcat-link">{{ sub.name }}</a>
@@ -582,30 +583,13 @@
             {% endfor %}
 
             <div class="footer-section">
-                <h3>Ми в соціальних мережах</h3>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                </div>
-
-                <div class="app-buttons">
-                    <a href="#" class="app-btn">
-                        <i class="fab fa-google-play"></i>
-                        <div>
-                            <div style="font-size: 10px;">Завантажити в</div>
-                            <div style="font-weight: bold;">Google Play</div>
-                        </div>
-                    </a>
-                    <a href="#" class="app-btn">
-                        <i class="fab fa-apple"></i>
-                        <div>
-                            <div style="font-size: 10px;">Завантажити в</div>
-                            <div style="font-weight: bold;">App Store</div>
-                        </div>
-                    </a>
-                </div>
+                <h3>Інформація</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'store:page' slug='delivery' %}">Доставка та оплата</a></li>
+                    <li><a href="{% url 'store:page' slug='contacts' %}">Контакти</a></li>
+                    <li><a href="{% url 'store:page' slug='about' %}">Про нас</a></li>
+                    <li><a href="{% url 'store:page' slug='warranty' %}">Гарантія та повернення</a></li>
+                </ul>
             </div>
         </div>
         <div style="text-align: center; margin-top: 40px; font-size: 12px; color: #999;">

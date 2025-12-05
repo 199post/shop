@@ -27,5 +27,5 @@ urlpatterns = [
     path('api/search/', views.search_suggestions, name='search_suggestions'),
 
     # Pages
-    path('page/<slug:slug>/', views.page_detail, name='page_detail'),
+    path('page/<slug:slug>/', views.page_detail, name='page'),
 ]
