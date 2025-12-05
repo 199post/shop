@@ -13,10 +13,12 @@
     }
 
     .sidebar {
-        background: #fff;
+        background: #ffffff;
         border-radius: 8px;
         padding: 16px;
-        border: 1px solid #e9e9e9;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        align-self: start;
     }
 
     .sidebar h3 {
@@ -258,7 +260,6 @@
     </aside>
 
     <div>
-        <h2 style="margin-bottom: 15px; color: #333;">Товари</h2>
 
         {% if products %}
         <div class="products-grid">
@@ -282,7 +283,8 @@
                 {% endif %}
 
                 <div class="category">{{ product.category.name }}</div>
-                <h3><a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: inherit;">{{ product.name }}</a></h3>
+                <h3><a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: inherit;">{{
+                        product.name }}</a></h3>
                 <div class="price-container">
                     {% if product.has_discount %}
                     <div class="original-price">{{ product.price|floatformat:0 }} ₴</div>
