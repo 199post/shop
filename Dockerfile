@@ -40,15 +40,16 @@ RUN pip install --upgrade pip && \
 COPY ./src /app
 
 # ------------------------------
-# 7) EXPOSE — Railway проигнорирует,
-#    но полезно для документации
+# 7) Делаем start.sh исполняемым
+# ------------------------------
+RUN chmod +x /app/start.sh
+
+# ------------------------------
+# 8) EXPOSE — документация порта
 # ------------------------------
 EXPOSE 8080
 
 # ------------------------------
-# 8) Production CMD для Railway
-#
-#    ВНИМАНИЕ:
-#    Обязательно используем `sh -c`, иначе ${PORT} не подставится!
+# 9) Production CMD
 # ------------------------------
-CMD ["sh", "-c", "gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8080} --log-file -"]
+CMD ["/bin/bash", "/app/start.sh"]
